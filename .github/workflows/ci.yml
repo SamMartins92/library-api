@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore Library.slnx
+      - run: dotnet build Library.slnx --no-restore --configuration Release
+      - run: dotnet test Library.slnx --no-build --configuration Release --logger "trx;LogFilePrefix=results" --collect "XPlat Code Coverage"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: tests/**/TestResults/
